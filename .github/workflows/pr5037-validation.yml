@@ -19,7 +19,7 @@ jobs:
           fetch-depth: 0
 
       - name: Common setup
-        uses: ./.github/actions/common-setup
+        uses: $/.github/actions/common-setup
         with:
           python-version: "3.13"
           free-disk-space: "true"
@@ -28,6 +28,9 @@ jobs:
 
       - name: Install nightly rustfmt for make format
         run: rustup toolchain install nightly --profile minimal --component rustfmt
+
+      - name: Install cargo-machete
+        run: cargo install --locked cargo-machete@0.9.2
 
       - name: Run make format
         run: make format
@@ -38,8 +41,8 @@ jobs:
       - name: Run make pre-commit
         run: make pre-commit
 
-  tests:
-    name: cargo-test and pytest
+  rust-tests:
+    name: nautilus-indicators Rust tests
     runs-on: ubuntu-22.04
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
@@ -48,16 +51,12 @@ jobs:
           fetch-depth: 0
 
       - name: Common setup
-        uses: ./.github/actions/common-setup
+        uses: $/.github/actions/common-setup
         with:
           python-version: "3.13"
           free-disk-space: "true"
-          free-disk-space-max-build: "true"
           build-type: "test"
           rust-cache-enabled: "false"
 
-      - name: Run Rust tests
-        run: make cargo-test
-
-      - name: Run Python tests
-        run: make pytest
+      - name: Run indicator Rust tests
+        run: make cargo-test-crate-nautilus-indicators
