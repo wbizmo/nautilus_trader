@@ -1,0 +1,63 @@
+name: PR 5037 local validation
+
+permissions:
+  contents: read
+
+on:
+  push:
+    branches:
+      - validation/pr-5037
+
+jobs:
+  format-precommit:
+    name: format and pre-commit
+    runs-on: ubuntu-22.04
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+          fetch-depth: 0
+
+      - name: Common setup
+        uses: ./.github/actions/common-setup
+        with:
+          python-version: "3.13"
+          free-disk-space: "true"
+          build-type: "pre-commit"
+          rust-cache-enabled: "false"
+
+      - name: Install nightly rustfmt for make format
+        run: rustup toolchain install nightly --profile minimal --component rustfmt
+
+      - name: Run make format
+        run: make format
+
+      - name: Confirm formatter produced no diff
+        run: git diff --exit-code
+
+      - name: Run make pre-commit
+        run: make pre-commit
+
+  tests:
+    name: cargo-test and pytest
+    runs-on: ubuntu-22.04
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+          fetch-depth: 0
+
+      - name: Common setup
+        uses: ./.github/actions/common-setup
+        with:
+          python-version: "3.13"
+          free-disk-space: "true"
+          free-disk-space-max-build: "true"
+          build-type: "test"
+          rust-cache-enabled: "false"
+
+      - name: Run Rust tests
+        run: make cargo-test
+
+      - name: Run Python tests
+        run: make pytest
