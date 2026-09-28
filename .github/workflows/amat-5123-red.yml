@@ -1,0 +1,30 @@
+name: AMAT 5123 red validation
+
+permissions:
+  contents: read
+
+on:
+  push:
+    branches:
+      - validation/5123-red
+
+jobs:
+  rust-tests:
+    name: nautilus-indicators Rust tests
+    runs-on: ubuntu-22.04
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+          fetch-depth: 0
+
+      - name: Common setup
+        uses: ./.github/actions/common-setup
+        with:
+          python-version: "3.13"
+          free-disk-space: "true"
+          build-type: "test"
+          rust-cache-enabled: "false"
+
+      - name: Run indicator Rust tests
+        run: make cargo-test-crate-nautilus-indicators
